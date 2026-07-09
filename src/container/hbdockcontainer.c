@@ -1,7 +1,9 @@
 #include <windows.h>
+#include <stdlib.h>
 
 #include "hbdockcontainer.h"
 #include "hbdocklayout.h"
+#include "hbdockhost.h"
 
 #define HB_DOCK_CONTAINER_CLASS "HBDockContainer"
 
@@ -11,9 +13,9 @@ static LRESULT CALLBACK hbDockContainerProc(
    WPARAM wParam,
    LPARAM lParam )
 {
-   HB_DOCK_MANAGER *pManager;
+   HB_DOCK_HOST * pHost;
 
-   pManager = ( HB_DOCK_MANAGER * )
+   pHost = ( HB_DOCK_HOST * )
       GetWindowLongPtr(
          hWnd,
          GWLP_USERDATA );
@@ -22,22 +24,34 @@ static LRESULT CALLBACK hbDockContainerProc(
    {
       case WM_CREATE:
       {
-         CREATESTRUCT *cs;
+         CREATESTRUCT * cs;
+         HB_DOCK_MANAGER * pManager;
 
          cs = ( CREATESTRUCT * ) lParam;
+         pManager = ( HB_DOCK_MANAGER * ) cs->lpCreateParams;
+
+         pHost = ( HB_DOCK_HOST * ) calloc(
+            1,
+            sizeof( HB_DOCK_HOST ) );
+
+         if( pHost != NULL )
+            hbDockHostAttach(
+               pHost,
+               hWnd,
+               pManager );
 
          SetWindowLongPtr(
             hWnd,
             GWLP_USERDATA,
-            ( LONG_PTR ) cs->lpCreateParams );
+            ( LONG_PTR ) pHost );
 
          return 0;
       }
 
       case WM_SIZE:
 
-         if( pManager != NULL )
-            hbDockPerformLayout( pManager );
+         if( pHost != NULL )
+            hbDockHostResize( pHost );
 
          return 0;
 
@@ -52,12 +66,49 @@ static LRESULT CALLBACK hbDockContainerProc(
             hWnd,
             &ps );
 
+         if( pHost != NULL )
+            hbDockHostPaint(
+               pHost,
+               ps.hdc );
+
          EndPaint(
             hWnd,
             &ps );
 
          return 0;
       }
+
+      case WM_LBUTTONDOWN:
+      case WM_MOUSEMOVE:
+      case WM_LBUTTONUP:
+      case WM_CAPTURECHANGED:
+      case WM_TIMER:
+
+         if( pHost != NULL &&
+             hbDockHostHandleMessage(
+                pHost,
+                msg,
+                wParam,
+                lParam ) )
+            return 0;
+
+         break;
+
+      case WM_DESTROY:
+
+         if( pHost != NULL )
+         {
+            hbDockHostDetach( pHost );
+
+            free( pHost );
+
+            SetWindowLongPtr(
+               hWnd,
+               GWLP_USERDATA,
+               ( LONG_PTR ) NULL );
+         }
+
+         return 0;
    }
 
    return DefWindowProc(
