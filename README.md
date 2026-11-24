@@ -26,6 +26,13 @@ Compilado y probado con **Borland C++ 5.5** + **Harbour 3.2 Oficial**.
   FiveWin (`TDockManager`, `TDockPanel`) para no tener que llamar
   funciones C sueltas desde tu `.prg`.
 
+![HBDock32 Docking Panel Layout](docs/hbdock32_overview.png)
+
+- **停靠面板與巢狀分割**：如左側的「專案總管」與下方的「輸出」視窗，透過**互動式分隔線（Splitters）**自由調整區塊大小。
+- **拖放停靠引導（Drag & Drop Guides）**：拖曳面板時，畫面中央會出現上、下、左、右與中央分頁的停靠方位指示，放開滑鼠即可精準嵌入或合併為分頁群組。
+- **獨立浮動視窗（Floating Window）**：將面板拖離停靠引導區，就會自動轉換為可自由移動的獨立浮動視窗。
+- **邊緣自動隱藏（Auto-Hide Tab）**：不常用的面板可釘選收折至視窗邊緣，滑鼠移過時再暫時滑出展開。
+
 ## Estado del proyecto
 
 En desarrollo activo. El árbol de docking, el drag & drop, los
